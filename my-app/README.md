@@ -1,7 +1,7 @@
 <table>
 <tr>
 <th colspan="2">
-<h2>Angular 17 Workshoå</h2>
+<h2>Angular 17 Workshop</h2>
 </th>
 </tr>
 <tr>
