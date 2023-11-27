@@ -1,0 +1,11 @@
+@if (photoService.photo.loading()) {
+  <div>Loading Photo</div>
+} @else if (photoService.photo.loaded()) {
+  <div class="main-photo"><img src="/assets/images/{{photoService.photo.id()}}" /></div>
+
+  @defer (on timer(3000ms)) {
+    <div>DERIVED</div>
+  } @placeholder {
+    <div>PLACEHOLDER</div>
+  }
+}

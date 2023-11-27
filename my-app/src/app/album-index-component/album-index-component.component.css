@@ -1,0 +1,18 @@
+.thumbnail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 30vw);
+  grid-gap: 3%;
+  margin-left: 1%;
+}
+
+.thumbnail {
+  width: 30vw;
+  height: 20vh;
+  overflow: hidden;
+}
+
+img {
+  width: 30vw;
+  height: 20vh;
+  object-fit: cover;
+}
