@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Making the web svelter with SvelteKit - Part 0</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/white.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+
+		<style>
+			img {
+				max-height: 700px !important;
+			}
+
+			.reveal pre code {
+				max-height: 700px;
+			}
+
+			.reveal h1 {
+				text-transform: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="reveal" style="width: 100%;">
+			<div class="slides">
+				<section data-markdown data-background-image="images/reveal_background.jpg" data-background-size="contain">
+					<textarea data-template>
+						# Angular 17
+
+						### Hva er nytt?
+						---
+						- Oppdatert dokumentasjon!
+						- Block-templates (erstatter *ngIf, *ngFor, osv)
+						- Deferrable views (lazy loading)
+						- Server-Side Rendering (SSR) og Static-site Generation (SSG)
+							- Ny @angular/ssr pakke
+						- Hydration er nå tilgjengelig som standard
+						- Flere Livssyklus "hooks" (afterRender, afterNextRender)
+						- Bruker Vite og esbuild for nye prosjekter (kortere byggetider)
+						- Visning av Dependency Injection i DevTools
+						- Standalone APIs
+						- Signals for reaktivitet
+						- Material 3
+
+						---
+						## Oppdatert dokumentasjon
+
+						- Dokumentasjonen på https://angular.dev/ er oppdatert og har blitt betydelig enklere og forbedret
+						- Finnes foreløpig en online-tutorial hvor man kan teste rett i nettleseren, og en offline-tutorial hvor man installerer Angular 17 lokalt
+						---
+						# Signals
+
+						- Nytt i Angular 16
+						- Ny metode for å markere data som skal være reaktivt gjennom applikasjonen
+
+						---
+						# Signals
+
+						<pre><code data-line-numbers><script type="text/template">
+						export class Album extends PrimusRecord {
+						  image: WritableSignal<string> = signal("");
+						  caption: WritableSignal<string> = signal("");
+						  images: WritableSignal<string> = signal("");
+						}
+						//...
+						this.id.set(model.id);
+						this.loaded.set(record.loaded());
+						//...
+						@if (album.loaded()) {
+							//...
+						}
+						</script></code></pre>
+						---
+						# Block-templates
+						---
+						---
+						# Block-templates
+
+						- Endelig (!) erstattes *ngIf, *ngFor og *ngSwitch med ekte block-uttrykk
+							- @if(uttrykk) {} , @else-if(uttrykk) {} og @else {}
+							- @for (item of list; track item.id) {}
+							- @for (item of collection; track item.id; let index = $index, first = $first; let last = $last, even = $even, odd = $odd; let count = $count)
+							- @switch (uttrykk) { @case('string') { } @case('string') { } {@default { } }
+						---
+						# *ngIf:  Før
+
+						<pre><code data-line-numbers><script type="text/template">
+						<div *ngIf="user.isAuthenticated; else anonymousUser">
+						  <UserModule></UserModule>
+						</div>
+						<ng-template #anonymousUser>
+							<div>User is not authenticated</div>
+						</ng-template>
+						</script></code></pre>
+						---
+						# *ngIf: Før If-Else
+
+						<pre><code data-line-numbers><script type="text/template">
+						<ng-container *ngIf="foo === 1;else second"></ng-container>
+						<ng-template #second>
+							<ng-container *ngIf="foo === 2;else third"></ng-container>
+						</ng-template>
+						<ng-template #third></ng-template>
+						</script></code></pre>
+
+						---
+						# *ngIf: Før "if-else" alternativ 2
+
+						<pre><code data-line-numbers><script type="text/template">
+						<div *ngIf="user.isAdmin">
+						  <AdminModule></AdminModule>
+						</div>
+						<div *ngIf="user.isUser">
+						  <UserModule></UserModule>
+						</div>
+						<div *ngIf="user.unAuthenticated">
+							<div>User is not authenticated</div>
+						</div>
+						</script></code></pre>
+
+						---
+						# ngIf Etter
+
+						<pre><code data-line-numbers><script type="text/template">
+						@if (user.isAdmin) {
+							<AdminModule></AdminModule>
+						} @else if (user.isUser) {
+							<UserModule></UserModule>
+						} @else {
+							<UnauthorizedModule></UnauthorizedModule>
+						}
+						</script></code></pre>
+
+						---
+						# *ngFor: Før
+
+						<pre><code data-line-numbers><script type="text/template">
+						<li *ngFor="let item of array">
+							<a routerLink="/detail/{{item.id()}}">
+								<span class="badge">{{item.id()}}</span>
+								{{item.name()}}
+							  </a>
+						  </li>
+						</script></code></pre>
+
+						---
+						# *ngFor: Etter
+
+						<pre><code data-line-numbers><script type="text/template">
+						@for (item of array; track item.id) {
+							<li>
+								<a routerLink="/detail/{{item.id()}}">
+									<span class="badge">{{item.id()}}</span>
+									{{item.name()}}
+								</a>
+						  	</li>
+						}
+						</script></code></pre>
+
+						---
+						# *ngFor: Etter
+
+						Gir Tilgang til ytterligere metadata on for-løkken:
+						- $index (teller-variabelen for løkken 0, 1, 2, ...)
+						- $first (true hvis det er første element i listen)
+						- $last (true hvis det er siste element i listen)
+						- $even (true hvis index % 2 = 0)
+						- $odd (true hvis index % 2 != 0)
+						- $count (array.length)
+
+						---
+						# *ngFor: Eksempel metadata:
+
+						<pre><code data-line-numbers><script type="text/template">
+						@for(user of users;
+							track user.id;
+							let index = $index;
+							let first = $first;
+							let last = $last;
+							let even = $even;
+							let odd = $odd) {
+
+						<p [class.odd]="odd"
+						  [class.even]="even"
+						  [class.first]="first"
+						  [class.last]="last">
+						  {{index+1}}: {{ user.name }}
+						</p>
+
+						}
+						</script></code></pre>
+						---
+						# *ngFor: Eksempel Resultat:
+
+						<pre><code data-line-numbers><script type="text/template">
+						<p class="even first"> 1: Sarah </p>
+						<p class="odd"> 2: Amy </p>
+						<p class="even"> 3: Rachel </p>
+						<p class="odd"> 4: Jessica </p>
+						<p class="even last"> 5: Poornima </p>
+						</script></code></pre>
+
+						---
+						# *ngFor: @empty!
+
+						<pre><code data-line-numbers><script type="text/template">
+						@for (item in array; track item.id} {
+							<li>{{item.name}}</li>
+						} @empty {
+							<li>No items in array</li>
+						}
+						</script></code></pre>
+						---
+						# *ngSwitch: Før
+
+						<pre><code data-line-numbers><script type="text/template">
+						<div [ngSwitch]="userLevel">
+						  <admin-dashboard *ngSwitchCase="admin"/>
+						  <user-dashboard *ngSwitchCase="user"/>
+						  <unAuthorized-dashboard *ngSwitchDefault/>
+						</div>
+						</script></code></pre>
+
+						---
+						# *ngSwitch: Etter
+
+						<pre><code data-line-numbers><script type="text/template">
+						@switch (userLevel) {
+						  @case ('admin') { <admin-dashboard/> }
+						  @case ('user') { <user-dashboard/> }
+						  @default { <unAuthorized-dashboard/> }
+						}
+						</script></code></pre>
+
+						---
+
+						# Deferrable Views
+
+
+						---
+						# Deferrable Views
+
+						Gjør det mulig å utsette last og tegning av:
+						- Komponenter
+						- Datainnhenting
+						- Directives
+						- Pipes
+						- Transitive avhengigheter via dynamiske import
+						---
+						# Deferrable Views
+
+						Syntax:
+
+						<pre><code data-line-numbers><script type="text/template">
+						@defer (on viewport) {
+						  <comment-list/>
+						} @loading {
+						  Loading…
+						} @error {
+						  Loading failed :(
+						} @placeholder {
+						  <img src="comments-placeholder.png">
+						}
+						</script></code></pre>
+
+						---
+						# Deferrable Views on:
+
+						- immediate: start lazy loading med en gang
+						- idle: start når nettleseren har godt med ledig tid
+						- timer(ms): start når timeren løper ut
+						- viewport: start når dette elementet er synlig på siden
+						- viewport(anchor-ref): start når anchor-ref er synlig på siden
+						- interaction: start når brukeren har en interaksjon med elementet
+						- interaction(anchor-ref): start når brukeren har en interaksjon med elementet med anchor-ref
+						- hover: start når musen er over elementet
+						- hover(anchor-ref): start når musen er over elementet med anchor-ref
+						- when uttrykk: start når uttrykk === true
+
+						---
+						# Deferrable Views prefetch
+
+						Man kan også forhåndshente ved å bruke prefetch. Her starter lazy loading enten når elementet er synlig, eller når nettleseren er idle.
+
+						<pre><code data-line-numbers><script type="text/template">
+						@defer (on viewport; prefetch on idle) {
+						  <min-komponent />
+						}
+						</script></code></pre>
+
+						Ellers støtter **prefetch** de samme triggerene som **on**
+
+						---
+						# Static-site Generation (SSG) og Static-site Rendering (SSR)
+
+						---
+						# SSR & SSG
+
+						For nye prosjekter kan man aktivere SSR og SSG via **ng new**.
+						<div>Enten ved å svare [y] når det blir spurt om eller ved:</div>
+
+						<pre><code>ng new my-app --ssr</code></pre>
+
+						For eksisterende prosjekter ved:
+
+						<pre><code>ng add @angular/ssr</code></pre>
+						---
+						# SSR & SSG
+
+						Støtter deployment til Edge-Workers og intruduserer en ny fetch-backend
+						i HttpClient.
+						---
+						# Lifecycle Hooks
+
+						For å flytte bort fra direkte DOM manipulering og emulering er det lagt til
+						støtte for to nye livssykluser:
+
+						- afterRender: registrerer en callback når applikasjonen er ferdig med å rendre
+						- afterNextRender: registrerer en callback etter neste gang applikasjonen er ferdig med å rendre
+
+						Begge støtter en *phase* verdi (read eller write) som hjelper Angular kjøre callbackene på rett
+						sted i livssyklusen.
+						---
+						#Lifecycle Hooks
+
+						<pre><code data-line-numbers><script type="text/template">
+						@Component({
+						  selector: 'my-chart-cmp',
+						  template: `<div #chart>{{ ... }}</div>`,
+						})
+						export class MyChartCmp {
+						  @ViewChild('chart') chartRef: ElementRef;
+						  chart: MyChart|null;
+
+						  constructor() {
+							afterNextRender(() => {
+							  this.chart = new MyChart(this.chartRef.nativeElement);
+							}, {phase: AfterRenderPhase.Write});
+						  }
+						}
+						</script></code></pre>
+						---
+						# esbuild og Vite
+
+						- Overgangen startet som Developer Preview i Angular 16
+						- Forbedrer ytelsen betydelig på bygging. Spesielt ved SSR
+
+						---
+
+						## Onwards
+
+						Til Workshoppen!
+
+						<pre><code data-line-numbers><script type="text/template">
+						ng add @angular/ssr
+						sudo npm install -g @angular/cli
+						ng generate @angular/core:control-flow
+						</script></code></pre>
+
+						<pre><code data-line-numbers><script type="text/template">
+						python3 -m venv .venv
+						pip3 install flask flask_cors
+						./startServer.sh
+						</script></code></pre>
+					</textarea>
+				</section>
+
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+				width: 1600,
+				slideNumber: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>

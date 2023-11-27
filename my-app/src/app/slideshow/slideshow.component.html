@@ -1,9 +1,0 @@
-@if (photoService.primusStore.getModelStore('photo').loading()) {
-<div>Loading Slideshow...</div>
-} @else if (photoService.primusStore.getModelStore('photo').loaded()) {
-  <div id="cf2" #cf2>
-    @for (photo of photoService.photos; track photo.id) {
-      <div class="photo transparent" [ngStyle]="{'background-image':'url(/assets/images/' + photo.id() + ')', display: 'block'}"></div>
-    }
-  </div>
-}
