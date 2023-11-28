@@ -2,3 +2,6 @@
 .DS_Store
 my-api/.venv
 node_modules
+my-api/my-api.iml
+.angular
+.idea

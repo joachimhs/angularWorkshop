@@ -11,7 +11,7 @@ from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 cors = CORS(app)
 
-delay = 0
+delay = 2
 
 app.config['CORS_HEADERS'] = 'Content-Type'
 
