@@ -1,14 +1,16 @@
 @if (albumService.loading()) {
   <div>Laster album...</div>
 } @else if (albumService.loaded() && photoService.loaded()) {
-  <div class="slideshow">
+  <div id="cf2" class="slideshow">
     @for (photo of photoService.photos; track photo.id) {
       <img class="photo transparent" src="/assets/images/{{photo.id()}}" />
     }
   </div>
   <div class="album-grid">
     @for (album of albumService.albums; track album.id) {
-      <div><img src="/assets/images/{{album.image()}}" /></div>
+      <a routerLink="album/{{album.id()}}">
+        <div><img src="/assets/images/{{album.image()}}" /></div>
+      </a>
     }
   </div>
 }
